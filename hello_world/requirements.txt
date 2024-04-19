@@ -1,0 +1,3 @@
+aws-lambda-powertools[tracer]
+psycopg2-binary
+requests

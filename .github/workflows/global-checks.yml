@@ -1,0 +1,40 @@
+name: Check Branch and Username
+
+on:
+  push:
+    branches: [ "**" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - uses: pre-commit/action@v3.0.1
+
+    - name: Checks on Branch and User
+      run: |
+        # Short name for current branch. For PRs, use target branch (base ref)
+        GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
+        echo "GIT_BRANCH=$GIT_BRANCH" >> $GITHUB_ENV
+        echo $GIT_BRANCH
+        if [[ $GIT_BRANCH == "development" || $GIT_BRANCH == "staging" || $GIT_BRANCH == "production" ]]; then
+            echo "Branch is correct"
+            # check if the user is in given string
+            IFS=',' read -ra USERNAME_LIST <<< "${{ secrets.USERNAME_LIST }}"
+            # Check if username exists in the list
+            for i in "${USERNAME_LIST[@]}"; do
+            if [[ "$i" == "${{ github.actor }}" ]]; then
+                echo "Username is in the list"
+                exit 0
+            fi
+            done
+            echo "Username is not in the list"
+            exit 1
+        elif [[ $GIT_BRANCH == ${{ github.actor }}/* ]]; then
+            echo "Branch is correct"
+        else
+            echo "Branch is not correct"
+            exit 1
+        fi

@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    ticker-master-api
+
+    Powertools example
+
+Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
+    Function:
+        Timeout: 2500
+        MemorySize: 128
+        Runtime: python3.11
+
+Resources:
+    HelloWorldFunction:
+        Type: AWS::Serverless::Function # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+        Properties:
+            Handler: app.lambda_handler
+            CodeUri: hello_world
+            Description: Hello World function
+            Architectures:
+                - x86_64
+            Tracing: Active
+            Events:
+                TimerEvent:
+                    Type: Schedule
+                    Properties:
+                        Schedule: rate(1 minutes)
+
+                HelloPath:
+                    Type: Api # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+                    Properties:
+                        Path: /venues
+                        Method: GET
+                HelloPath1:
+                    Type: Api # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+                    Properties:
+                        Path: /events
+                        Method: GET
+             # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
+            Environment:
+                Variables:
+                    POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+                    POWERTOOLS_METRICS_NAMESPACE: Powertools
+                    LOG_LEVEL: INFO
+            Tags:
+                LambdaPowertools: python
